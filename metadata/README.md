@@ -34,7 +34,6 @@ Report on exceptional use cases within a DSpace repository.
 
 Sample Output
 
-``
     TOTAL ITEMS (53397)
     Is Private Item (1)
         10822.3/560020
@@ -144,11 +143,10 @@ Sample Output
         10822/558703 text/html
         10822/558697 text/html
         10822/558690 text/html
-``
+
 
 # Configuration: Add the following to config/modules/curate.cfg
 
-``
     plugin.named.org.dspace.curate.CurationTask = \
     
         org.dspace.ctask.metadata.ExceptionReport = exception, \
@@ -157,4 +155,3 @@ Sample Output
     ui.tasknames = \
          exception = DigitalGeorgetown Exception Report, \
          metadatareg = Metadata Registry Report, \
-``
