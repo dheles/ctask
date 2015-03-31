@@ -26,11 +26,6 @@ See https://github.com/Georgetown-University-Libraries/File-Analyzer/releases/ta
 
 ![image](https://cloud.githubusercontent.com/assets/1111057/6398762/ade74b92-bda2-11e4-8ff4-8c455af6813d.png)
 
-
-### Sample Code to Create the JSON Dump of the Metadata Registry
-
-https://gist.github.com/terrywbrady/f39e88b39dc1a9a05ec4
-
 ## ExceptionReport ##
 
 Report on exceptional use cases within a DSpace repository.
@@ -149,7 +144,6 @@ Sample Output
         10822/558703 text/html
         10822/558697 text/html
         10822/558690 text/html
-
 ``
 
 # Configuration: Add the following to config/modules/curate.cfg
