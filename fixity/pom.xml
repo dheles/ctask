@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.dspace</groupId>
+  <artifactId>fixity</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>DSpace fixity curation tasks</name>
+
+  <!-- Inherit most defaults from DSpace Parent -->
+  <parent>
+    <artifactId>dspace-parent</artifactId>
+    <groupId>org.dspace</groupId>
+    <version>5.8</version>
+  </parent>
+
+  <properties>
+    <!--Force UTF-8 encoding during build on all platforms-->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- DSpace Version Information (supported version of DSpace) -->
+    <dspace.version>5.8</dspace.version>
+  </properties>
+
+
+  <build>
+    <plugins>
+      <!-- Initialize Maven compiler-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <!-- Require Java 1.8 or higher. TODO: refine and test -->
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.dspace</groupId>
+      <artifactId>dspace-api</artifactId>
+      <version>${dspace.version}</version>
+    </dependency>
+    <!-- <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.4.9</version>
+    </dependency> -->
+    <!-- <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.5</version>
+    </dependency> -->
+  </dependencies>
+</project>
