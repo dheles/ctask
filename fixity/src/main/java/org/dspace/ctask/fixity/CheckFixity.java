@@ -58,7 +58,7 @@ public class CheckFixity extends AbstractCurationTask
                                       " error: " + e.getMessage();
                             report(result);
                             setResult(result);
-                            return CURATE_FAIL;
+                            return CURATE_SKIP;
 
                             // throw new IOException("Exception retreiving bitstream: " + e.getMessage());
                         }
