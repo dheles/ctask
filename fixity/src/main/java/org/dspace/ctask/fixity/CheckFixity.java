@@ -9,6 +9,8 @@ package org.dspace.ctask.fixity;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -42,6 +44,10 @@ public class CheckFixity extends AbstractCurationTask
     /** log4j category */
     private static final Logger log = Logger.getLogger(CheckFixity.class);
 
+    private List<String> results = new ArrayList<String>();
+
+    int status = CURATE_UNSET;
+
     /**
      * Perform the curation task upon passed DSO
      *
@@ -52,6 +58,9 @@ public class CheckFixity extends AbstractCurationTask
     public int perform(DSpaceObject dso) throws IOException  {
         if (dso.getType() == Constants.ITEM) {
             Item item = (Item)dso;
+
+            status = CURATE_SUCCESS;
+
             try {
                 for (Bundle bundle : item.getBundles()) {
                     for (Bitstream bs : bundle.getBitstreams()) {
@@ -64,10 +73,11 @@ public class CheckFixity extends AbstractCurationTask
                             String result = "Unable to retreive bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
                                       " error: " + e.getMessage();
-                            report(result);
-                            setResult(result);
+                            // report(result);
+                            // setResult(result);
                             log.error(result);
-                            return CURATE_SKIP;
+                            results.add(result);
+                            // return CURATE_SKIP;
 
                             // throw new IOException("Exception retreiving bitstream: " + e.getMessage());
                         }
@@ -76,26 +86,45 @@ public class CheckFixity extends AbstractCurationTask
                             String result = "Checksum discrepancy in item: " + item.getHandle() +
                                       " for bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
                                       " ingest: " + bs.getChecksum() + " current: " + compCs;
-                            report(result);
-                            setResult(result);
+                            // report(result);
+                            // setResult(result);
                             log.error(result);
+                            results.add(result);
                             // NOTE: returning skip, rather than fail allows the task to continue
                             // return CURATE_FAIL;
-                            return CURATE_SKIP;
+                            // return CURATE_SKIP;
                         }
                     }
                 }
             } catch (AuthorizeException authE) {
-                throw new IOException("AuthorizeException: " + authE.getMessage());
+                // throw new IOException("AuthorizeException: " + authE.getMessage());
+                results.add("AuthorizeException: " + authE.getMessage());
+                status = CURATE_ERROR;
             } catch (SQLException sqlE) {
-                throw new IOException("SQLException: " + sqlE.getMessage());
-            } catch (Exception e) {
-                throw new IOException("Unknown Exception: " + e.getMessage());
+                // throw new IOException("SQLException: " + sqlE.getMessage());
+                results.add("SQLException: " + sqlE.getMessage());
+                status = CURATE_ERROR;
             }
-            setResult("All bitstream checksums agree in item: " + item.getHandle());
-            return CURATE_SUCCESS;
+            // results.add("All bitstream checksums agree in item: " + item.getHandle());
+            // status =  CURATE_SUCCESS;
         } else {
-            return CURATE_SKIP;
+            status = CURATE_SKIP;
         }
+
+        processResults();
+        return status;
+    }
+
+    private void processResults() throws IOException
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Translation report: \n----------------\n");
+        for(String result : results)
+        {
+            sb.append(result).append("\n");
+        }
+        setResult(sb.toString());
+        report(sb.toString());
+
     }
 }
