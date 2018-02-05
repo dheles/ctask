@@ -50,6 +50,11 @@ public class CheckFixity extends AbstractCurationTask
             try {
                 for (Bundle bundle : item.getBundles()) {
                     for (Bitstream bs : bundle.getBitstreams()) {
+                        try {
+                            bs.retrieve();
+                        } catch (Exception e) {
+                            throw new IOException("Exception retreiving bitstream: " + e.getMessage());
+                        }
                         String compCs = Utils.checksum(bs.retrieve(), bs.getChecksumAlgorithm());
                         if (! compCs.equals(bs.getChecksum())) {
                             String result = "Checksum discrepancy in item: " + item.getHandle() +
@@ -65,6 +70,8 @@ public class CheckFixity extends AbstractCurationTask
                 throw new IOException("AuthorizeException: " + authE.getMessage());
             } catch (SQLException sqlE) {
                 throw new IOException("SQLException: " + sqlE.getMessage());
+            } catch (Exception e) {
+                throw new IOException("Unknown Exception: " + e.getMessage());
             }
             setResult("All bitstream checksums agree in item: " + item.getHandle());
             return CURATE_SUCCESS;
