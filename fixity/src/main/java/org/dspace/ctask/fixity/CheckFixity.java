@@ -53,7 +53,14 @@ public class CheckFixity extends AbstractCurationTask
                         try {
                             bs.retrieve();
                         } catch (Exception e) {
-                            throw new IOException("Exception retreiving bitstream: " + e.getMessage());
+                            String result = "Unable to retreive bitstream in item: " + item.getHandle() +
+                                      " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
+                                      " error: " + e.getMessage();
+                            report(result);
+                            setResult(result);
+                            return CURATE_FAIL;
+
+                            // throw new IOException("Exception retreiving bitstream: " + e.getMessage());
                         }
                         String compCs = Utils.checksum(bs.retrieve(), bs.getChecksumAlgorithm());
                         if (! compCs.equals(bs.getChecksum())) {
