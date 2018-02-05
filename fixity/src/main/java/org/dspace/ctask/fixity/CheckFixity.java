@@ -10,6 +10,8 @@ package org.dspace.ctask.fixity;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.content.Bitstream;
 import org.dspace.content.Bundle;
@@ -37,6 +39,9 @@ import static org.dspace.curate.Curator.*;
 @Suspendable(invoked=Invoked.INTERACTIVE)
 public class CheckFixity extends AbstractCurationTask
 {
+    /** log4j category */
+    private static final Logger log = Logger.getLogger(CheckFixity.class);
+
     /**
      * Perform the curation task upon passed DSO
      *
@@ -52,12 +57,16 @@ public class CheckFixity extends AbstractCurationTask
                     for (Bitstream bs : bundle.getBitstreams()) {
                         try {
                             bs.retrieve();
+                            String result = "Retreived bitstream in item: " + item.getHandle() +
+                                      " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")";
+                            log.debug(result);
                         } catch (Exception e) {
                             String result = "Unable to retreive bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
                                       " error: " + e.getMessage();
                             report(result);
                             setResult(result);
+                            log.error(result);
                             return CURATE_SKIP;
 
                             // throw new IOException("Exception retreiving bitstream: " + e.getMessage());
@@ -69,6 +78,7 @@ public class CheckFixity extends AbstractCurationTask
                                       " ingest: " + bs.getChecksum() + " current: " + compCs;
                             report(result);
                             setResult(result);
+                            log.error(result);
                             return CURATE_FAIL;
                         }
                     }
