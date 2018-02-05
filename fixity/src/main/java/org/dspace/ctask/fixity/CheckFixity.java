@@ -8,6 +8,7 @@
 package org.dspace.ctask.fixity;
 
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,19 @@ public class CheckFixity extends AbstractCurationTask
                             String result = "Retreived bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")";
                             log.debug(result);
-                        } catch (Exception e) {
+
+                            // since we can retreive the bitstream, go ahead and check its checksum
+                            String compCs = Utils.checksum(bs.retrieve(), bs.getChecksumAlgorithm());
+                            if (! compCs.equals(bs.getChecksum())) {
+                                result = "Checksum discrepancy in item: " + item.getHandle() +
+                                          " for bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
+                                          " ingest: " + bs.getChecksum() + " current: " + compCs;
+                                // report(result);
+                                // setResult(result);
+                                log.error(result);
+                                results.add(result);
+                            }
+                        } catch (FileNotFoundException e) {
                             String result = "Unable to retreive bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
                                       " error: " + e.getMessage();
@@ -81,29 +94,16 @@ public class CheckFixity extends AbstractCurationTask
 
                             // throw new IOException("Exception retreiving bitstream: " + e.getMessage());
                         }
-                        String compCs = Utils.checksum(bs.retrieve(), bs.getChecksumAlgorithm());
-                        if (! compCs.equals(bs.getChecksum())) {
-                            String result = "Checksum discrepancy in item: " + item.getHandle() +
-                                      " for bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
-                                      " ingest: " + bs.getChecksum() + " current: " + compCs;
-                            // report(result);
-                            // setResult(result);
-                            log.error(result);
-                            results.add(result);
-                            // NOTE: returning skip, rather than fail allows the task to continue
-                            // return CURATE_FAIL;
-                            // return CURATE_SKIP;
-                        }
                     }
                 }
             } catch (AuthorizeException authE) {
-                // throw new IOException("AuthorizeException: " + authE.getMessage());
                 results.add("AuthorizeException: " + authE.getMessage());
                 status = CURATE_ERROR;
+                throw new IOException("AuthorizeException: " + authE.getMessage());
             } catch (SQLException sqlE) {
-                // throw new IOException("SQLException: " + sqlE.getMessage());
                 results.add("SQLException: " + sqlE.getMessage());
                 status = CURATE_ERROR;
+                throw new IOException("SQLException: " + sqlE.getMessage());
             }
             // results.add("All bitstream checksums agree in item: " + item.getHandle());
             // status =  CURATE_SUCCESS;
