@@ -79,7 +79,9 @@ public class CheckFixity extends AbstractCurationTask
                             report(result);
                             setResult(result);
                             log.error(result);
-                            return CURATE_FAIL;
+                            // NOTE: returning skip, rather than fail allows the task to continue
+                            // return CURATE_FAIL;
+                            return CURATE_SKIP;
                         }
                     }
                 }
