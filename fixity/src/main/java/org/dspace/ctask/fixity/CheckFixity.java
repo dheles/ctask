@@ -22,6 +22,7 @@ import org.dspace.content.DSpaceObject;
 import org.dspace.content.Item;
 import org.dspace.core.Constants;
 import org.dspace.curate.AbstractCurationTask;
+import org.dspace.curate.Curator;
 import org.dspace.curate.Suspendable;
 import org.dspace.curate.Utils;
 
@@ -32,8 +33,8 @@ import static org.dspace.curate.Curator.*;
  * CheckFixity confirms the presence of each selected bitstream.
  * It then computes a checksum for each selected bitstream
  * and compares it to the stored ingest-time calculated value.
- * Task succeeds if all bitstreams are present & checksums agree, else fails.
- * TODO: add logging
+ * Task succeeds if all bitstreams are present & checksums agree.
+ * Unfortunately, returning fail will stop the task, so it never fails.
  *
  * @author richardrodgers
  * @author dheles
@@ -48,6 +49,15 @@ public class CheckFixity extends AbstractCurationTask
     private List<String> results = new ArrayList<String>();
 
     int status = CURATE_UNSET;
+
+    @Override
+    public void init(Curator curator, String taskId) throws IOException
+    {
+        super.init(curator, taskId);
+
+        // clear our results list from previous tasks
+        results.clear();
+    }
 
     /**
      * Perform the curation task upon passed DSO
@@ -77,36 +87,30 @@ public class CheckFixity extends AbstractCurationTask
                                 result = "Checksum discrepancy in item: " + item.getHandle() +
                                           " for bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
                                           " ingest: " + bs.getChecksum() + " current: " + compCs;
-                                // report(result);
-                                // setResult(result);
                                 log.error(result);
                                 results.add(result);
+                                status = CURATE_SKIP;
                             }
                         } catch (FileNotFoundException e) {
                             String result = "Unable to retreive bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
                                       " error: " + e.getMessage();
-                            // report(result);
-                            // setResult(result);
                             log.error(result);
                             results.add(result);
-                            // return CURATE_SKIP;
-
-                            // throw new IOException("Exception retreiving bitstream: " + e.getMessage());
+                            status = CURATE_SKIP;
                         }
                     }
                 }
             } catch (AuthorizeException authE) {
-                results.add("AuthorizeException: " + authE.getMessage());
-                status = CURATE_ERROR;
                 throw new IOException("AuthorizeException: " + authE.getMessage());
             } catch (SQLException sqlE) {
-                results.add("SQLException: " + sqlE.getMessage());
-                status = CURATE_ERROR;
                 throw new IOException("SQLException: " + sqlE.getMessage());
             }
-            // results.add("All bitstream checksums agree in item: " + item.getHandle());
-            // status =  CURATE_SUCCESS;
+            if (status == CURATE_SUCCESS) {
+              String result = "All bitstream checksums agree in item: " + item.getHandle();
+              log.debug(result);
+              results.add(result);
+            }
         } else {
             status = CURATE_SKIP;
         }
@@ -118,13 +122,12 @@ public class CheckFixity extends AbstractCurationTask
     private void processResults() throws IOException
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("Translation report: \n----------------\n");
+        sb.append("Fixity report: \n----------------\n");
         for(String result : results)
         {
             sb.append(result).append("\n");
         }
         setResult(sb.toString());
         report(sb.toString());
-
     }
 }
