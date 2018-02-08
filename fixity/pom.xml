@@ -31,9 +31,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.7.0</version>
         <configuration>
-          <!-- Require Java 1.8 or higher. TODO: refine and test -->
-          <source>1.8</source>
-          <target>1.8</target>
+          <!-- Require Java 1.7 or higher. TODO: refine and test -->
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
     </plugins>
