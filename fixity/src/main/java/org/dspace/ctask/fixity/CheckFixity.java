@@ -9,6 +9,7 @@ package org.dspace.ctask.fixity;
 
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,13 +77,13 @@ public class CheckFixity extends AbstractCurationTask
                 for (Bundle bundle : item.getBundles()) {
                     for (Bitstream bs : bundle.getBitstreams()) {
                         try {
-                            bs.retrieve();
+                            InputStream stream = bs.retrieve();
                             String result = "Retreived bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")";
                             log.debug(result);
 
                             // since we can retreive the bitstream, go ahead and check its checksum
-                            String compCs = Utils.checksum(bs.retrieve(), bs.getChecksumAlgorithm());
+                            String compCs = Utils.checksum(stream, bs.getChecksumAlgorithm());
                             if (! compCs.equals(bs.getChecksum())) {
                                 result = "Checksum discrepancy in item: " + item.getHandle() +
                                           " for bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
@@ -91,6 +92,7 @@ public class CheckFixity extends AbstractCurationTask
                                 results.add(result);
                                 status = CURATE_SKIP;
                             }
+                            stream.close();
                         } catch (FileNotFoundException e) {
                             String result = "Unable to retreive bitstream in item: " + item.getHandle() +
                                       " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
