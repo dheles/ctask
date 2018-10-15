@@ -17,10 +17,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import org.dspace.authorize.AuthorizeException;
-import org.dspace.content.Bitstream;
-import org.dspace.content.Bundle;
-import org.dspace.content.DSpaceObject;
-import org.dspace.content.Item;
+import org.dspace.content.*;
+import org.dspace.content.factory.ContentServiceFactory;
+import org.dspace.content.service.BitstreamService;
 import org.dspace.core.Constants;
 import org.dspace.curate.AbstractCurationTask;
 import org.dspace.curate.Curator;
@@ -51,10 +50,13 @@ public class CheckFixity extends AbstractCurationTask
 
     int status = CURATE_UNSET;
 
+    protected BitstreamService bitstreamService;
+
     @Override
     public void init(Curator curator, String taskId) throws IOException
     {
         super.init(curator, taskId);
+        bitstreamService = ContentServiceFactory.getInstance().getBitstreamService();
 
         // clear our results list from previous tasks
         results.clear();
@@ -75,27 +77,27 @@ public class CheckFixity extends AbstractCurationTask
 
             try {
                 for (Bundle bundle : item.getBundles()) {
-                    for (Bitstream bs : bundle.getBitstreams()) {
+                    for (Bitstream bitstream : bundle.getBitstreams()) {
                         try {
-                            InputStream stream = bs.retrieve();
+                            InputStream inputstream = bitstreamService.retrieve(Curator.curationContext(), bitstream);
                             String result = "Retreived bitstream in item: " + item.getHandle() +
-                                      " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")";
+                                      " . Bitstream: '" + bitstream.getName() + "' (seqId: " + bitstream.getSequenceID() + ")";
                             log.debug(result);
 
                             // since we can retreive the bitstream, go ahead and check its checksum
-                            String compCs = Utils.checksum(stream, bs.getChecksumAlgorithm());
-                            if (! compCs.equals(bs.getChecksum())) {
+                            String compCs = Utils.checksum(inputstream, bitstream.getChecksumAlgorithm());
+                            if (! compCs.equals(bitstream.getChecksum())) {
                                 result = "Checksum discrepancy in item: " + item.getHandle() +
-                                          " for bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
-                                          " ingest: " + bs.getChecksum() + " current: " + compCs;
+                                          " for bitstream: '" + bitstream.getName() + "' (seqId: " + bitstream.getSequenceID() + ")" +
+                                          " ingest: " + bitstream.getChecksum() + " current: " + compCs;
                                 log.error(result);
                                 results.add(result);
                                 status = CURATE_SKIP;
                             }
-                            stream.close();
+                            inputstream.close();
                         } catch (FileNotFoundException e) {
                             String result = "Unable to retreive bitstream in item: " + item.getHandle() +
-                                      " . Bitstream: '" + bs.getName() + "' (seqId: " + bs.getSequenceID() + ")" +
+                                      " . Bitstream: '" + bitstream.getName() + "' (seqId: " + bitstream.getSequenceID() + ")" +
                                       " error: " + e.getMessage();
                             log.error(result);
                             results.add(result);
