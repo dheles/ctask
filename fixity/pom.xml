@@ -12,14 +12,14 @@
   <parent>
     <artifactId>dspace-parent</artifactId>
     <groupId>org.dspace</groupId>
-    <version>5.8</version>
+    <version>6.3</version>
   </parent>
 
   <properties>
     <!--Force UTF-8 encoding during build on all platforms-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- DSpace Version Information (supported version of DSpace) -->
-    <dspace.version>5.8</dspace.version>
+    <dspace.version>6.3</dspace.version>
   </properties>
 
 
@@ -29,11 +29,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.8.0</version>
         <configuration>
           <!-- Require Java 1.7 or higher. TODO: refine and test -->
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
     </plugins>
