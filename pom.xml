@@ -10,6 +10,7 @@
       <module>general</module>
       <module>mediafilter</module>
       <module>metadata</module>
+      <module>fixity</module>
     </modules>
 
 </project>
